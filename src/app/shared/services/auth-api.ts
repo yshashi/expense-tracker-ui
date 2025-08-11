@@ -11,8 +11,8 @@ export class AuthApi {
     return this.http.post(`${API_URL}/users/login`, { email, password });
   }
 
-  register(name: string, email: string, password: string, phoneNumber: number) {
-    return this.http.post(`${API_URL}/users/register`, { name, email, password, phoneNumber });
+  register(name: string, email: string, phoneNumber: number, password: string) {
+    return this.http.post(`${API_URL}/users/register`, { name, email, phoneNumber, password });
   }
 
   logout() {

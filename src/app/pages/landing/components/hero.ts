@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-hero',
   template: `
-    <section class="flex-grow flex items-center justify-center py-20">
+    <section class="flex-grow flex items-center justify-center py-20 bg-gradient-to-br from-sky-200 to-sky-50">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <h2 class="text-5xl font-extrabold text-sky-800 mb-6">
           Track Your Expenses Effortlessly

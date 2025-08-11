@@ -62,6 +62,7 @@ export class Login {
   authApi = inject(AuthApi);
   router = inject(Router);
   toast = inject(NgToastService);
+  
   loginForm = this.fb.group({
     email: ['', Validators.required],
     password: ['', Validators.required],
