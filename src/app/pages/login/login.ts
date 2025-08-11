@@ -3,6 +3,7 @@ import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthApi } from '../../shared/services/auth-api';
 import { NgToastComponent, NgToastService } from 'ng-angular-popup';
+import { LoginResponse } from './types/login-response';
 
 @Component({
   selector: 'app-login',
@@ -62,7 +63,7 @@ export class Login {
   authApi = inject(AuthApi);
   router = inject(Router);
   toast = inject(NgToastService);
-  
+
   loginForm = this.fb.group({
     email: ['', Validators.required],
     password: ['', Validators.required],
@@ -77,6 +78,7 @@ export class Login {
           next: (response) => {
             this.toast.success('Login successful!');
             this.router.navigate(['/dashboard']);
+            localStorage.setItem('token', response.user.token);
           },
           error: (error) => {
             console.error('Login failed:', error);

@@ -1,5 +1,10 @@
 import { Component, inject } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthApi } from '../../shared/services/auth-api';
 import { NgToastService } from 'ng-angular-popup';
@@ -23,7 +28,7 @@ import { NgToastService } from 'ng-angular-popup';
           required
         />
       </div>
-      
+
       <div>
         <label for="email" class="block text-sm font-medium text-gray-700"
           >Email</label
@@ -62,7 +67,8 @@ import { NgToastService } from 'ng-angular-popup';
       </div>
       <button
         type="submit"
-        class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300" (click)="register()"
+        class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-2 px-4 rounded-md shadow-md transition duration-300"
+        (click)="register()"
       >
         Register
       </button>
@@ -76,42 +82,52 @@ import { NgToastService } from 'ng-angular-popup';
   imports: [RouterLink, ReactiveFormsModule],
 })
 export class Register {
-authApi = inject(AuthApi);
-router = inject(Router);
-toast = inject(NgToastService);
+  authApi = inject(AuthApi);
+  router = inject(Router);
+  toast = inject(NgToastService);
 
-fb = inject(FormBuilder);
+  fb = inject(FormBuilder);
 
-registerForm = this.fb.group({
-    name:['',Validators.required],
-     email:['', Validators.compose([Validators.required, Validators.email])],
-    phoneNumber:['',Validators.compose([Validators.required, Validators.maxLength(10), Validators.minLength(10)])],
-   
-    password:['',Validators.compose([Validators.maxLength(9), Validators.minLength(6)])]
-})
+  registerForm = this.fb.group({
+    name: ['', Validators.required],
+    email: ['', Validators.compose([Validators.required, Validators.email])],
+    phoneNumber: [
+      '',
+      Validators.compose([
+        Validators.required,
+        Validators.pattern('^[0-9]+$'),
+        Validators.minLength(10),
+      ]),
+    ],
 
+    password: [
+      '',
+      Validators.minLength(8),
+    ],
+  });
 
-register(){
-  if(this.registerForm.valid){
-    const { name, email, phoneNumber, password } = this.registerForm.value;
-    if(name && email && phoneNumber && password){
-    this.authApi.register(name, email, Number(phoneNumber), password).subscribe({
-      next: (response:any) =>{
-            alert("sign up succesfully");
-            this.registerForm.reset();
-            this.router.navigate(['login'])
-      },
-       error: (error) => {
-            console.error('Register failed:', error);
-            this.toast.danger('Register failed. Please check your credentials.');
-          },
-    })
+  register() {
+    if (this.registerForm.valid) {
+      const { name, email, phoneNumber, password } = this.registerForm.value;
+      if (name && email && phoneNumber && password) {
+        this.authApi
+          .register(name, email, Number(phoneNumber), password)
+          .subscribe({
+            next: (response: any) => {
+              alert('sign up succesfully');
+              this.registerForm.reset();
+              this.router.navigate(['login']);
+            },
+            error: (error) => {
+              console.error('Register failed:', error);
+              this.toast.danger(
+                'Register failed. Please check your credentials.'
+              );
+            },
+          });
+      }
+    } else {
+      this.toast.warning('Please fill in all required fields.');
     }
-
-  }else{
-    this.toast.warning('Please fill in all required fields.');
-
   }
-
-}
 }
