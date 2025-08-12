@@ -19,4 +19,12 @@ export class AuthApi {
   logout() {
     return this.http.post(`${API_URL}/users/logout`, {});
   }
+
+  addTransaction(amount: number, type: string, category:string, date:Date, reference: string, description:string){
+    return this.http.post(`${API_URL}/transactions/add-transaction`, { amount, type, category, date, reference, description });
+  }
+  
+  getAllTransaction(){
+    return this.http.post(`${API_URL}/transections/get-transection`,{});
+  }
 }

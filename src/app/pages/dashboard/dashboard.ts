@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { MonthlyBudget } from './components/monthly-budget';
 import { MoneyWidget } from '../../shared/components/money-widget';
+import { Transactions } from "./components/transactions";
 
 @Component({
   selector: 'app-dashboard',
@@ -19,12 +20,14 @@ import { MoneyWidget } from '../../shared/components/money-widget';
       />
       }
     </div>
-
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10">
       <app-monthly-budget />
     </div>
+    <div class="mt-9">
+      <app-transactions />
+    </div>
   </div>`,
-  imports: [MoneyWidget, MonthlyBudget],
+  imports: [MoneyWidget, MonthlyBudget, Transactions],
 })
 export class Dashboard {
   widgetData = [
