@@ -9,6 +9,8 @@ import {
 import { AuthApi } from '../../../shared/services/auth-api';
 import { CurrencyPipe } from '@angular/common';
 import { TransactionApi } from '../services/transaction-api';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NgToastService } from 'ng-angular-popup';
 
 @Component({
   selector: 'app-transactions',
@@ -97,18 +99,14 @@ import { TransactionApi } from '../services/transaction-api';
                             <option value="" disabled selected>
                               Select category
                             </option>
-                            <option>Tip</option>
-                            <option>Stationary</option>
-                            <option>Food</option>
-                            <option>Movie</option>
-                            <option>Bills</option>
-                            <!-- <optgroup label="Income">
+                            
+                            <optgroup label="Income">
 													<option>Salary</option>
 													<option>Part Time</option>
 													<option>Project</option>
 													<option>Freelancing</option>
-												</optgroup> -->
-                            <!-- <optgroup label="Expense">
+												</optgroup> 
+                             <optgroup label="Expense">
 													<option>Tip</option>
 													<option>Stationary</option>
 													<option>Food</option>
@@ -117,7 +115,7 @@ import { TransactionApi } from '../services/transaction-api';
 													<option>Medical</option>
 													<option>Fees</option>
 													<option>TAX</option>
-												</optgroup> -->
+												</optgroup>
                           </select>
                         </div>
                         <!-- Date -->
@@ -136,7 +134,7 @@ import { TransactionApi } from '../services/transaction-api';
                           />
                         </div>
                         <!-- Reference -->
-                        <div class="mb-4">
+                        <!-- <div class="mb-4">
                           <label
                             for="reference"
                             class="block text-sm font-semibold text-gray-800 mb-2"
@@ -150,7 +148,7 @@ import { TransactionApi } from '../services/transaction-api';
                             class="mt-1 block w-full rounded-lg border border-gray-300 px-4 py-2 shadow-sm placeholder-gray-400 focus:border-indigo-600 focus:ring-2 focus:ring-indigo-400 focus:outline-none transition"
                             formControlName="reference"
                           />
-                        </div>
+                        </div> -->
                         <!-- Description -->
                         <div class="mb-4">
                           <label
@@ -175,15 +173,15 @@ import { TransactionApi } from '../services/transaction-api';
                 <div
                   class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6"
                 >
-                  <button
-                    type="button"
-                    command="close"
-                    commandfor="dialog"
-                    class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-6 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 sm:ml-3 sm:w-auto"
-                    (click)="postTransaction()"
-                  >
-                    submit
-                  </button>
+                 <button
+  type="button"
+  command="close"
+  commandfor="dialog"
+  class="inline-flex w-full justify-center rounded-md bg-indigo-600 px-6 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 sm:ml-3 sm:w-auto"
+  (click)="transactionId ? editTransaction() : postTransaction()"
+>
+  {{ transactionId ? 'Update' : 'Submit' }}
+</button>
                   <button
                     type="button"
                     command="close"
@@ -225,11 +223,11 @@ import { TransactionApi } from '../services/transaction-api';
             >
               Date
             </th>
-            <th
+            <!-- <th
               class="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wider"
             >
               Reference
-            </th>
+            </th> -->
             <th
               class="px-4 py-3 text-left text-sm font-semibold uppercase tracking-wider"
             >
@@ -253,16 +251,16 @@ import { TransactionApi } from '../services/transaction-api';
             <td class="px-4 py-3">{{ transaction.type }}</td>
             <td class="px-4 py-3">{{ transaction.category }}</td>
             <td class="px-4 py-3">{{ transaction.date }}</td>
-            <td class="px-4 py-3">{{ transaction.reference }}</td>
+            <!-- <td class="px-4 py-3">{{ transaction.refrence }}</td> -->
             <td class="px-4 py-3">{{ transaction.description }}</td>
             <td class="px-4 py-3 text-right">
               <button
-                class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition" (click)="transactionEdit(transaction.transactionId)"
               >
                 Edit
               </button>
               <button
-                class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition ml-2"
+                class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition ml-2" (click)="deleteTransaction(transaction.transactionId)"
               >
                 Delete
               </button>
@@ -278,6 +276,10 @@ export class Transactions implements OnInit {
   authApi = inject(AuthApi);
   transactionApi = inject(TransactionApi);
   transactions: any = [];
+   
+  router = inject(Router);
+    toast = inject(NgToastService);
+    transactionId: string | null = null;
 
   ngOnInit(): void {
     this.getAllTransaction();
@@ -288,7 +290,7 @@ export class Transactions implements OnInit {
     type: ['', Validators.required],
     category: ['', Validators.required],
     date: ['', Validators.required],
-    reference: ['', Validators.required],
+    // reference: ['', Validators.required],
     description: ['', Validators.required],
   });
 
@@ -307,10 +309,12 @@ export class Transactions implements OnInit {
         )
         .subscribe({
           next: (response: any) => {
-            alert('Transaction added successfully');
+            this.toast.success('Transaction added successfully');
             this.transactions = response;
             console.log(response);
+            this.transactionId = null;
             this.transactionForm.reset();
+            this.getAllTransaction();
           },
           error: (error) => {
             console.error('Register failed:', error);
@@ -331,4 +335,71 @@ export class Transactions implements OnInit {
       },
     });
   }
+
+
+  
+ deleteTransaction(transactionId: string) {
+  this.transactionApi.deleteTransaction(transactionId).subscribe({
+    next: (res) => {
+      console.log(res);
+      this.toast.success("Transaction deleted");
+      this.getAllTransaction();
+    },
+    error: (err) => {
+      console.log(err);
+    },
+  });
+}
+
+
+
+transactionEdit(transactionId: string) {
+  this.transactionApi.getOneTransaction(transactionId).subscribe({
+    next: (res: any) => {
+      console.log("before patch:", res);
+      this.transactionId = transactionId;
+      const transaction = res.transaction;
+      this.transactionForm.patchValue({
+      amount: transaction.amount,
+      type: transaction.type,
+      category: transaction.category,
+      date: transaction.date?.split('T')[0],
+      reference: transaction.reference,
+      description: transaction.description
+      });
+
+      console.log("after patch:", this.transactionForm.value);
+
+      const dialog = document.getElementById('dialog') as HTMLDialogElement;
+      dialog?.showModal();
+    },
+    error: (err) => {
+      console.error('Failed to load form:', err);
+    }
+  });
+}
+
+closeDialog() {
+  const dialog = document.getElementById('dialog') as HTMLDialogElement;
+  dialog?.close();
+}
+
+editTransaction(): void {
+  if ( this.transactionId) {
+    const updatedData = this.transactionForm.value;
+    this.transactionApi.editTransaction(this.transactionId, updatedData).subscribe({
+      next: (res) => {
+        console.log('Transaction updated:', res);
+        this.toast.success('Transaction updated');
+        this.transactionForm.reset();
+        this.transactionId = null;
+        this.closeDialog();
+        this.getAllTransaction();
+      },
+      error: (err) => {
+        console.error('Update failed:', err);
+      }
+    });
+  } 
+}
 }
